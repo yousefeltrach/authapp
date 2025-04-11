@@ -1,13 +1,17 @@
 "use client"
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Registerform() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-   
+
+  const router = useRouter();
+  
+  //check if any values are messing
   const  handlesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name || !email || !password) {
@@ -15,6 +19,21 @@ export default function Registerform() {
       return;
     }
     try{
+      //check if the user exists
+       const resUserExists = await fetch("api/userExists",{
+        method : "POST",
+        headers: {
+          "Content-type" : "application/json",
+        },
+        body: JSON.stringify({email}),
+       });
+
+       const {user} = await resUserExists.json()
+       if (user) {
+        setError("User already exists.");
+        return;
+       }
+
       const res = await fetch('api/register',{
         method: "POST",
         headers: {
@@ -27,6 +46,7 @@ export default function Registerform() {
       if (res.ok) {
         const form = e.target as HTMLFormElement;
         form.reset();
+        router.push("/");
       } else {
         console.log("error: registration failed"); 
       }
