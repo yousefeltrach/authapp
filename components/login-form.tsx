@@ -1,8 +1,8 @@
 "use client"
 import Link from "next/link";
 import { useState } from "react";
-import 
-singIn from 'next-auth/react'
+import {signIn} from 'next-auth/react';
+import { useRouter } from "next/navigation";
 
 
 export default function Loginform() {
@@ -11,23 +11,31 @@ export default function Loginform() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const router = useRouter();
+
 const handleSubmit = async (e) => {
   e.preventDefault();
+
   try {
-    const res = await singIn('credentials', {
-      email, password,
-       redirect : false,
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: false 
     });
-    if (res.ok) {
-      setError('Invalid credentials')
+
+    if (res.error) { 
+      setError('Invalid credentials') 
+      return;
     }
-  }catch (error) {}
+
+    router.replace("dashboard");
+  } catch (error) {
+    console.log(error);
+  }
 };
 
   return (
-    // <div className="grid place-items-center h-screen">
-    //   login form
-    // </div>
+
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
    
@@ -37,7 +45,7 @@ const handleSubmit = async (e) => {
     </div>
 
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form onSubmit={handleSubmit } action="#" method="POST" className="space-y-6">
+      <form onSubmit={handleSubmit }  className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
             Email address
@@ -87,21 +95,19 @@ const handleSubmit = async (e) => {
             Login
           </button>
         </div>
-
+        {error && (
         <div className="bg-red-500 text-white w-fit text-sm py-1 px-3 rounded-md mt-2">
          {error} 
           </div>
-      </form>
-
-      <p className="mt-10 text-center text-sm/6 text-gray-500">
-        Don`t have an account?{' '}
-        <Link href={"/register"} className="underline font-semibold text-indigo-600 hover:text-indigo-500">
-          Register
-        </Link>
-      </p>
+          )}
+      
+          <Link className="text-sm mt-3 text-right" href={"/register"}>
+            Don't have an account? <span className="underline">Register</span>
+          </Link>
+  
+    </form>  
     </div>
   </div>
   )
 }
-
 

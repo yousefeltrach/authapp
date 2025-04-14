@@ -1,30 +1,79 @@
 
-import NextAuth from "next-auth/next";
-import  CredentialsProvider  from "next-auth/providers/credentials";
+// import NextAuth from "next-auth/next";
+// import  CredentialsProvider  from "next-auth/providers/credentials";
+// import { connectMongoDB } from "@/lib/mongodb";
+// import User from "@/models/user";
+// import bcrypt from "bcryptjs";
+
+// const authOptions = {
+//     providers : [
+//         CredentialsProvider  ({
+//          name : "credentials",
+//          credentials: {},
+
+//          async autorize(credentials) {
+//             const user = {id: "1" } ;
+//             return user;
+//          },
+//      }), 
+//     ],
+//     Session : {
+//         strategy: "jwt",
+//     },
+//     secret: process.env.NEXTAUTH_SECRET,
+//     pages:{
+//         singIn: "/",
+//     },
+// };
+
+// const handler = NextAuth(authOptions);
+// export {handler as GET, handler as POST};
+
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/models/user";
+import NextAuth from "next-auth/next";
+import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
-const authOptions = {
-    providers : [
-        CredentialsProvider  ({
-         name : "credentials",
-         credentials: {},
+export const authOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {},
 
-         async autorize(credentials) {
-            const user = {id: "1" } ;
-            return user;
-         },
-     }), 
-    ],
-    Session : {
-        strategy: "jwt",
-    },
-    secret: process.env.NEXTAUTH_SECRET,
-    pages:{
-        singIn: "/",
-    },
+      async authorize(credentials) {
+        const { email, password } = credentials;
+
+        try {
+          await connectMongoDB();
+          const user = await User.findOne({ email });
+
+          if (!user) {
+            return null;
+          }
+
+          const passwordsMatch = await bcrypt.compare(password, user.password);
+
+          if (!passwordsMatch) {
+            return null;
+          }
+
+          return user;
+        } catch (error) {
+          console.log("Error: ", error);
+        }
+      },
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/",
+  },
 };
 
 const handler = NextAuth(authOptions);
-export {handler as GET, handler as POST};
+
+export { handler as GET, handler as POST };
