@@ -13,18 +13,18 @@ export default function Loginform() {
 
   const router = useRouter();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  try {
-    const res = await signIn('credentials', {
+    try {
+      const res = await signIn('credentials', {
       email,
       password,
       redirect: false 
     });
 
-    if (res.error) { 
-      setError('Invalid credentials') 
+    if (res?.error) {
+      setError('Invalid credentials')
       return;
     }
 
@@ -102,7 +102,7 @@ const handleSubmit = async (e) => {
           )}
       
           <Link className="text-sm mt-3 text-right" href={"/register"}>
-            Don't have an account? <span className="underline">Register</span>
+            Don’t have an account? <span className="underline">Register</span>
           </Link>
   
     </form>  
