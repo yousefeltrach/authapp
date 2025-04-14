@@ -1,7 +1,29 @@
+"use client"
 import Link from "next/link";
+import { useState } from "react";
+import 
+singIn from 'next-auth/react'
 
 
 export default function Loginform() {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await singIn('credentials', {
+      email, password,
+       redirect : false,
+    });
+    if (res.ok) {
+      setError('Invalid credentials')
+    }
+  }catch (error) {}
+};
+
   return (
     // <div className="grid place-items-center h-screen">
     //   login form
@@ -15,13 +37,14 @@ export default function Loginform() {
     </div>
 
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form action="#" method="POST" className="space-y-6">
+      <form onSubmit={handleSubmit } action="#" method="POST" className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
             Email address
           </label>
           <div className="mt-2">
             <input
+             onChange={(e) => setEmail(e.target.value)}
               id="email"
               name="email"
               type="email"
@@ -45,6 +68,7 @@ export default function Loginform() {
           </div>
           <div className="mt-2">
             <input
+             onChange={(e) => setPassword(e.target.value)}
               id="password"
               name="password"
               type="password"
@@ -64,7 +88,9 @@ export default function Loginform() {
           </button>
         </div>
 
-        <div className="bg-red-500 text-white w-fit text-sm py-1 px-3 rounded-md mt-2">Error message</div>
+        <div className="bg-red-500 text-white w-fit text-sm py-1 px-3 rounded-md mt-2">
+         {error} 
+          </div>
       </form>
 
       <p className="mt-10 text-center text-sm/6 text-gray-500">
